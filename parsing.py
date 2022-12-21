@@ -4,7 +4,17 @@ import csv
 
 def get_html(BASE_URL):
     response = requests.get(BASE_URL)
-    soup = BS(response.text, 'lxml')
+    return response.text
+
+def get_total_pages(html):
+    soup = BS(html, 'lxml')
+    pages = soup.find('ul', class_="pagination")
+    page = pages.find_all('li')[-1]
+    total_page = page.find('a').get('href').split('=')[-1]
+    return int(total_page)
+
+def get_data(html):
+    soup = BS(html, 'lxml')
     specsearsh = soup.select('div[class^="list-item list-label"]')
     for car in specsearsh:
         if specsearsh != None:
@@ -16,13 +26,10 @@ def get_html(BASE_URL):
 
             
             price = f'$ {price_dollar} ({price_som} сом)'
-            
             try:
-                image = car.find('div', class_='thumb-item-carousel').find('img', class_="lazy-image").get('data-src')
-            
-            except ArithmeticError:
-
-                image = None
+                image = car.find('div', class_ = 'thumb-item-carousel').find('img', class_ = 'lazy-image').get('data-src')
+            except AttributeError:
+                image = 'Нет фото'
             
             try:
                 year = car.find('p', class_="year-miles").find('span').text.strip()
@@ -60,27 +67,17 @@ def write_csv(data):
         write = csv.DictWriter(file, delimiter=',', fieldnames=name)
         write.writerow(data)
 
-# def get_total_pages(soup):
-#     pages = soup.find('ul', class_="pagination")
-#     page = pages.find_all('li')[-1]
-#     total_page = page.find('a').get('href').split('=')[-1]
-#     return int(total_page)
+def main():
 
-
-BASE_URL = 'https://www.mashina.kg/specsearch/all/?page=1'
-# page = '?page='
-for i in BASE_URL:
-    if 'page=1' in i:
-        get_html(BASE_URL)
-    if 'page=1' not in i:
-        url2 = 'https://www.mashina.kg/specsearch/all/'
-        i = 1
-        url2 += '?page=' + str(i)
-        i += 1
-        get_html(url2)
-        if i == 25:
-            break
+    BASE_URL = 'https://www.mashina.kg/specsearch/all/'
+    page = '?page='
     
-    # for i in range(1, total_pages+1):
-    #     url_page = BASE_URL + page + str(i)
+    total_page = get_total_pages(get_html(BASE_URL))
+    
+    for i in range(1, total_page+1):
+        url_page = BASE_URL + page + str(i)
+        html = get_html(url_page)
+        get_data(html)
+
+main()
 
