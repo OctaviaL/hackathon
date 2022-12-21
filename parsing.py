@@ -72,8 +72,8 @@ BASE_URL = 'https://www.mashina.kg/specsearch/all/?page=1'
 for i in BASE_URL:
     if 'page=1' in i:
         get_html(BASE_URL)
-    else:
-        url2 = 'https://www.mashina.kg/commercialsearch/all/'
+    if 'page=1' not in i:
+        url2 = 'https://www.mashina.kg/specsearch/all/'
         i = 1
         url2 += '?page=' + str(i)
         i += 1
@@ -83,3 +83,4 @@ for i in BASE_URL:
     
     # for i in range(1, total_pages+1):
     #     url_page = BASE_URL + page + str(i)
+
